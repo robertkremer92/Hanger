@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { many } from "@/lib/db";
 import Link from "next/link";
 import { requireSession } from "@/lib/auth";
 import { allInCents, formatEuro } from "@/lib/domain/money";
@@ -20,14 +21,13 @@ const STATUS: Record<Listing["status"], { text: string; tone: "good" | "warn" | 
 
 export default async function MijnAdvertenties() {
   const { supabase, user } = await requireSession("/verkopen/mijn");
-  const { data } = await supabase
+  const { data } = await many<Row>(supabase
     .from("listings")
     .select("*, listing_photos(path, position)")
     .eq("seller_id", user.id)
     .eq("listing_photos.kind", "main")
     .neq("status", "removed")
-    .order("created_at", { ascending: false })
-    .returns<Row[]>();
+    .order("created_at", { ascending: false }));
   const rows = data ?? [];
 
   return (

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { many } from "@/lib/db";
 import { createClient } from "@/lib/supabase/server";
 import { allInCents } from "@/lib/domain/money";
 import { CATEGORIES, type Category } from "@/lib/domain/rules";
@@ -25,7 +26,7 @@ export default async function Ontdek({ searchParams }: { searchParams: Promise<{
     .limit(60);
   if (category) query = query.eq("category", category);
   if (term) query = query.or(`title.ilike.%${term}%,brand.ilike.%${term}%`);
-  const { data, error } = await query.returns<Row[]>();
+  const { data, error } = await many<Row>(query);
   const listings = data ?? [];
 
   const chip = (value: Category | null, label: string) => {

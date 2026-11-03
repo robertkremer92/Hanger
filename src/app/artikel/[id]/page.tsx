@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { many } from "@/lib/db";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
@@ -18,7 +19,7 @@ async function load(id: string) {
   const { data: listing } = await supabase.from("listings").select("*").eq("id", id).maybeSingle<Listing>();
   if (!listing) return null;
   const [{ data: photos }, { data: seller }] = await Promise.all([
-    supabase.from("listing_photos").select("*").eq("listing_id", id).order("kind").order("position").returns<ListingPhoto[]>(),
+    many<ListingPhoto>(supabase.from("listing_photos").select("*").eq("listing_id", id).order("kind").order("position")),
     supabase.from("public_profiles").select("*").eq("id", listing.seller_id).maybeSingle<PublicProfile>(),
   ]);
   return { listing, photos: photos ?? [], seller };

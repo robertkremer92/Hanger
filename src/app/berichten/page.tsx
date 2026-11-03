@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { many } from "@/lib/db";
 import Link from "next/link";
 import { requireSession } from "@/lib/auth";
 import { formatWhen } from "@/lib/domain/dates";
@@ -12,12 +13,11 @@ type Row = Message & { listings: { title: string; brand: string; seller_id: stri
 
 export default async function Berichten() {
   const { supabase, user } = await requireSession("/berichten");
-  const { data } = await supabase
+  const { data } = await many<Row>(supabase
     .from("messages")
     .select("*, listings(title, brand, seller_id)")
     .order("created_at", { ascending: false })
-    .limit(300)
-    .returns<Row[]>();
+    .limit(300));
 
   const threads = new Map<string, Row>();
   for (const m of data ?? []) {
@@ -27,7 +27,7 @@ export default async function Berichten() {
   const list = [...threads.values()];
   const others = [...new Set(list.map((m) => (m.buyer_id === user.id ? m.listings.seller_id : m.buyer_id)))];
   const { data: people } = others.length
-    ? await supabase.from("public_profiles").select("id, display_name").in("id", others).returns<Pick<PublicProfile, "id" | "display_name">[]>()
+    ? await many<Pick<PublicProfile, "id" | "display_name">>(supabase.from("public_profiles").select("id, display_name").in("id", others))
     : { data: [] };
   const name = (id: string) => people?.find((p) => p.id === id)?.display_name || "Gebruiker";
 

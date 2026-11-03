@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { many } from "@/lib/db";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { requireSession } from "@/lib/auth";
@@ -29,8 +30,8 @@ export default async function Geschil({ params, searchParams }: { params: Promis
   const role = o.buyer_id === user.id ? "buyer" : o.seller_id === user.id ? "seller" : "support";
   const deciders = [d.decided_by, d.appeal_decided_by].filter(Boolean) as string[];
   const [{ data: evidence }, { data: people }] = await Promise.all([
-    supabase.from("dispute_evidence").select("*").eq("dispute_id", id).order("created_at").returns<Evidence[]>(),
-    supabase.from("public_profiles").select("id, display_name").in("id", [o.buyer_id, o.seller_id, ...deciders]).returns<Pick<PublicProfile, "id" | "display_name">[]>(),
+    many<Evidence>(supabase.from("dispute_evidence").select("*").eq("dispute_id", id).order("created_at")),
+    many<Pick<PublicProfile, "id" | "display_name">>(supabase.from("public_profiles").select("id, display_name").in("id", [o.buyer_id, o.seller_id, ...deciders])),
   ]);
   const name = (uid: string | null) => people?.find((p) => p.id === uid)?.display_name || "onbekend";
   const signed = evidence?.length

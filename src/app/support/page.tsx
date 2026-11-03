@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { many } from "@/lib/db";
 import Link from "next/link";
 import { requireSupport } from "@/lib/auth";
 import { formatEuro } from "@/lib/domain/money";
@@ -14,13 +15,12 @@ type Row = Dispute & { orders: Pick<Order, "number" | "total_cents"> };
 
 export default async function Support() {
   const { supabase, user } = await requireSupport();
-  const { data } = await supabase
+  const { data } = await many<Row>(supabase
     .from("disputes")
     .select("*, orders(number, total_cents)")
     .in("status", ["awaiting_review", "appealed", "awaiting_seller"])
     .order("decide_by", { ascending: true, nullsFirst: false })
-    .limit(200)
-    .returns<Row[]>();
+    .limit(200));
   const rows = data ?? [];
   const toDecide = rows.filter((d) => d.status !== "awaiting_seller" && !(d.status === "appealed" && d.decided_by === user.id));
   const waiting = rows.filter((d) => d.status === "awaiting_seller");

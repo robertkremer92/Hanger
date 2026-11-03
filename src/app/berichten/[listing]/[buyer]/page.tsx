@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { many } from "@/lib/db";
 import { notFound } from "next/navigation";
 import { requireSession } from "@/lib/auth";
 import { TopBar } from "@/components/ui";
@@ -21,7 +22,7 @@ export default async function Thread({ params }: { params: Promise<{ listing: st
 
   const otherId = user.id === buyerId ? listing.seller_id : buyerId;
   const [{ data: messages }, { data: other }] = await Promise.all([
-    supabase.from("messages").select("*").eq("listing_id", listingId).eq("buyer_id", buyerId).order("created_at").limit(500).returns<Message[]>(),
+    many<Message>(supabase.from("messages").select("*").eq("listing_id", listingId).eq("buyer_id", buyerId).order("created_at").limit(500)),
     supabase.from("public_profiles").select("id, display_name").eq("id", otherId).maybeSingle<Pick<PublicProfile, "id" | "display_name">>(),
   ]);
 

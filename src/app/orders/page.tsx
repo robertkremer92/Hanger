@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { many } from "@/lib/db";
 import Link from "next/link";
 import { requireSession } from "@/lib/auth";
 import { formatEuro } from "@/lib/domain/money";
@@ -17,15 +18,14 @@ export default async function Orders({ searchParams }: { searchParams: Promise<{
   const role = soort === "verkocht" ? "seller" : "buyer";
   const { supabase, user } = await requireSession("/orders");
 
-  const { data } = await supabase
+  const { data } = await many<Row>(supabase
     .from("orders")
     .select("*, listings(title, brand, category, listing_photos(path, position))")
     .eq(role === "seller" ? "seller_id" : "buyer_id", user.id)
     .not("status", "in", "(pending_payment,expired)")
     .eq("listings.listing_photos.kind", "main")
     .order("created_at", { ascending: false })
-    .limit(100)
-    .returns<Row[]>();
+    .limit(100));
   const rows = data ?? [];
 
   return (

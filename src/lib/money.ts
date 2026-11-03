@@ -1,4 +1,5 @@
 import "server-only";
+import { many } from "@/lib/db";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { stripe } from "@/lib/stripe";
 
@@ -22,14 +23,13 @@ export async function processMoney(limit = 25) {
   const now = new Date().toISOString();
   const result = { payouts: 0, refunds: 0, errors: [] as string[] };
 
-  const { data: payouts, error: e1 } = await db
+  const { data: payouts, error: e1 } = await many<Due>(db
     .from("orders")
     .select("id, number, payout_cents, refund_cents, stripe_charge_id, stripe_payment_intent_id, seller:profiles!orders_seller_id_fkey(stripe_account_id)")
     .is("stripe_transfer_id", null)
     .gt("payout_cents", 0)
     .lte("payout_due_at", now)
-    .limit(limit)
-    .returns<Due[]>();
+    .limit(limit));
   if (e1) result.errors.push(`payouts query: ${e1.message}`);
 
   for (const o of payouts ?? []) {
@@ -58,14 +58,13 @@ export async function processMoney(limit = 25) {
     }
   }
 
-  const { data: refunds, error: e2 } = await db
+  const { data: refunds, error: e2 } = await many<Due>(db
     .from("orders")
     .select("id, number, payout_cents, refund_cents, stripe_charge_id, stripe_payment_intent_id, seller:profiles!orders_seller_id_fkey(stripe_account_id)")
     .is("stripe_refund_id", null)
     .gt("refund_cents", 0)
     .lte("refund_due_at", now)
-    .limit(limit)
-    .returns<Due[]>();
+    .limit(limit));
   if (e2) result.errors.push(`refunds query: ${e2.message}`);
 
   for (const o of refunds ?? []) {

@@ -23,10 +23,12 @@ export default async function Beslissen({ params }: { params: Promise<{ id: stri
   const { data: o } = await supabase.from("orders").select("*, listings(title, brand, description, allows_fit_returns)").eq("id", d.order_id)
     .single<Order & { listings: { title: string; brand: string; description: string; allows_fit_returns: boolean } }>();
   if (!o) notFound();
-  const [{ data: buyer }, { data: seller }] = await Promise.all([
-    supabase.rpc("party_stats", { p_user: o.buyer_id }).returns<Stats>(),
-    supabase.rpc("party_stats", { p_user: o.seller_id }).returns<Stats>(),
+  const [buyerRes, sellerRes] = await Promise.all([
+    supabase.rpc("party_stats", { p_user: o.buyer_id }),
+    supabase.rpc("party_stats", { p_user: o.seller_id }),
   ]);
+  const buyer = (buyerRes.data ?? null) as Stats | null;
+  const seller = (sellerRes.data ?? null) as Stats | null;
 
   const isAppeal = d.status === "appealed";
   const ownDecision = isAppeal && d.decided_by === user.id;
