@@ -44,9 +44,12 @@ npm run dev
 3. Authentication → URL Configuration:
    - Site URL: je productie-URL.
    - Redirect URLs: `http://localhost:3000/auth/callback` en `https://JOUW-DOMEIN/auth/callback`.
-4. Database → Replication: zet `messages` aan voor Realtime (de migratie probeert dit al).
-5. Kopieer Project URL, `anon` key en `service_role` key naar je env.
-6. Maak jezelf medewerker nadat je een account hebt:
+4. Authentication → Email Templates: zet bij **Confirm signup** én **Magic Link** de link op
+   `{{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email`
+   (dan werkt de link ook in de ingebouwde browser van een mail-app).
+5. Database → Replication: zet `messages` aan voor Realtime (de migratie probeert dit al).
+6. Kopieer Project URL, `anon` key en `service_role` key naar je env.
+7. Maak jezelf medewerker nadat je een account hebt:
    ```sql
    update public.profiles set is_support = true where id = (select id from auth.users where email = 'jij@voorbeeld.nl');
    ```
