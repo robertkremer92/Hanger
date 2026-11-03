@@ -1,4 +1,4 @@
-import type { SVGProps } from "react";
+import type { ReactNode, SVGProps } from "react";
 
 type P = SVGProps<SVGSVGElement>;
 const base = { fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round", strokeLinejoin: "round", viewBox: "0 0 24 24", "aria-hidden": true } as const;
@@ -30,4 +30,25 @@ export function Wordmark() {
       <path d="M16 15 4 23.5h24z" fill="var(--tag)" />
     </svg>
   );
+}
+
+/** Haakje waarmee een artikel aan het rek hangt. */
+export function Hook() {
+  return (
+    <svg className="hook" viewBox="0 0 22 30" fill="none" stroke="currentColor" strokeWidth={2.4} strokeLinecap="round" aria-hidden>
+      <path d="M7 7a4 4 0 1 1 6 3.5c-1 .6-2 1.4-2 2.5V30" />
+    </svg>
+  );
+}
+
+/** Silhouetten per categorie, voor de tegels. */
+export function CategoryGlyph({ category }: { category: "dames" | "heren" | "tassen" | "schoenen" | "vintage" }) {
+  const paths: Record<typeof category, ReactNode> = {
+    dames: <path d="M42 12H58L60 30 55 36 80 88H20L45 36 40 30Z" fill="currentColor" />,
+    heren: <path d="M38 14 50 20 62 14 80 20 90 62 80 65 76 44 76 88 24 88 24 44 20 65 10 62 20 20Z" fill="currentColor" />,
+    tassen: <><path d="M36 40C36 16 64 16 64 40" fill="none" stroke="currentColor" strokeWidth={7} strokeLinecap="round" /><path d="M18 40H82L77 86H23Z" fill="currentColor" /></>,
+    schoenen: <path d="M8 72 11 52C23 52 31 46 37 37L50 49C62 56 76 56 86 60 93 62 93 70 89 72Z" fill="currentColor" />,
+    vintage: <path d="M36 14 50 24 64 14 80 22 90 60 80 63 76 44 76 88 24 88 24 44 20 63 10 60 20 22Z" fill="currentColor" />,
+  };
+  return <svg viewBox="0 0 100 100" aria-hidden>{paths[category]}</svg>;
 }

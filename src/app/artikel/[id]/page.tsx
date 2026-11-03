@@ -6,7 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { getSession } from "@/lib/auth";
 import { SHIPPING, allInCents, feeCents, formatEuro } from "@/lib/domain/money";
 import { CONDITIONS } from "@/lib/domain/rules";
-import { CATEGORY_TINT, Photo, PriceTag, TopBar } from "@/components/ui";
+import { CATEGORY_TINT, Photo, TopBar } from "@/components/ui";
 import { IconCheck, IconChevron, IconClock, IconLock, IconPerson } from "@/components/icons";
 import type { Listing, ListingPhoto, PublicProfile } from "@/lib/types";
 import { BuySheet } from "./BuySheet";
@@ -46,8 +46,11 @@ export default async function Artikel({ params }: Props) {
     <>
       <TopBar title={l.brand || "Artikel"} back="/" />
       <main className="stack" style={{ paddingBottom: available && !mine ? 200 : 120 }}>
-        <div className={`gallery ${main.length > 1 ? "multi" : ""}`}>
-          {main.map((p, i) => <Photo key={p.id} path={p.path} color={color} className="hero" alt={i === 0 ? l.title : ""} />)}
+        <div className="hero-wrap">
+          <div className={`gallery ${main.length > 1 ? "multi" : ""}`}>
+            {main.map((p, i) => <Photo key={p.id} path={p.path} color={color} className="hero" alt={i === 0 ? l.title : ""} />)}
+          </div>
+          {available ? <div className="swing big" aria-hidden><span>{formatEuro(allInCents(l.price_cents))}</span></div> : null}
         </div>
 
         <div className="stack" style={{ gap: 10 }}>
@@ -64,7 +67,7 @@ export default async function Artikel({ params }: Props) {
 
         {available ? (
           <div className="stack" style={{ gap: 8 }}>
-            <div><PriceTag big cents={allInCents(l.price_cents)} color={color} /></div>
+            <p style={{ fontSize: 28, fontWeight: 800, letterSpacing: "-.03em" }} className="num">{formatEuro(allInCents(l.price_cents))}</p>
             <details className="price">
               <summary>Alles-in prijs, verzending vanaf {formatEuro(SHIPPING.postnl.cents)} <IconChevron /></summary>
               <div className="lines">

@@ -1,10 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { Schibsted_Grotesk } from "next/font/google";
+import { Bricolage_Grotesque } from "next/font/google";
 import { TabBar } from "@/components/TabBar";
 import { getSession } from "@/lib/auth";
 import "./globals.css";
 
-const font = Schibsted_Grotesk({ subsets: ["latin"], variable: "--font-schibsted", display: "swap" });
+const font = Bricolage_Grotesque({ subsets: ["latin"], variable: "--font-bricolage", display: "swap" });
 
 export const metadata: Metadata = {
   title: { default: "Hanger", template: "%s · Hanger" },
@@ -16,8 +16,8 @@ export const viewport: Viewport = {
   initialScale: 1,
   viewportFit: "cover",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#F5F3F8" },
-    { media: "(prefers-color-scheme: dark)", color: "#141019" },
+    { media: "(prefers-color-scheme: light)", color: "#2D3BFF" },
+    { media: "(prefers-color-scheme: dark)", color: "#0E0E1C" },
   ],
 };
 
