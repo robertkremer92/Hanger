@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { RealtimePostgresInsertPayload } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/browser";
 import { checkMessage } from "@/lib/domain/rules";
 import { formatWhen } from "@/lib/domain/dates";
@@ -20,8 +21,8 @@ export function Chat({ listingId, buyerId, userId, initial }: { listingId: strin
     const supabase = createClient();
     const channel = supabase
       .channel(`thread:${listingId}:${buyerId}`)
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages", filter: `listing_id=eq.${listingId}` }, (payload) => {
-        const m = payload.new as Message;
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages", filter: `listing_id=eq.${listingId}` }, (payload: RealtimePostgresInsertPayload<Message & Record<string, unknown>>) => {
+        const m = payload.new;
         if (m.buyer_id !== buyerId) return;
         setMessages((prev) => (prev.some((x) => x.id === m.id) ? prev : [...prev, m]));
       })
